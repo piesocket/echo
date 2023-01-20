@@ -80,6 +80,15 @@ export default class Echo {
     }
 
     /**
+     * Leave all channels.
+     */
+    leaveAllChannels(): void {
+        for (const channel in this.connector.channels) {
+            this.leaveChannel(channel);
+        }
+    }
+
+    /**
      * Listen for an event on a channel instance.
      */
     listen(channel: string, event: string, callback: Function): Channel {
@@ -123,6 +132,10 @@ export default class Echo {
         if (typeof jQuery === 'function') {
             this.registerjQueryAjaxSetup();
         }
+
+        if (typeof Turbo === 'object') {
+            this.registerTurboRequestInterceptor();
+        }
     }
 
     /**
@@ -163,4 +176,18 @@ export default class Echo {
             });
         }
     }
+
+    /**
+     * Register the Turbo Request interceptor to add the X-Socket-ID header.
+     */
+    registerTurboRequestInterceptor(): void {
+        document.addEventListener('turbo:before-fetch-request', (event: any) => {
+            event.detail.fetchOptions.headers['X-Socket-Id'] = this.socketId();
+        });
+    }
 }
+
+/**
+ * Export channel classes for TypeScript.
+ */
+export { Channel, PresenceChannel };
